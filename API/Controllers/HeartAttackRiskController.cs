@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
+﻿using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
+using Microsoft.Extensions.Configuration;
 
 namespace WolfgramAPI.Controllers
 {
@@ -15,10 +11,13 @@ namespace WolfgramAPI.Controllers
     public class HeartAttackRiskController : ControllerBase
     {
         private static readonly HttpClient client = new HttpClient();
+        private string appId;
 
-        HeartAttackRiskController(IConfiguration )
+        public HeartAttackRiskController(IConfiguration configuration)
+        {
+            appId = configuration["AppSettings:AppId"];
+        }
 
-        // GET api/values
         [HttpGet]
         public async Task<ActionResult<string>> Get(string ldl, string hdl, string sys, string dia, string gender="female", int age=40)
         {
@@ -29,9 +28,10 @@ namespace WolfgramAPI.Controllers
             client.DefaultRequestHeaders.Accept.Clear();
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            var url = $"http://api.wolframalpha.com/v2/query?input=Risk of Heart Attack LDL cholesterol: {ldl} HDL cholesterol: {hdl} " +
-                                    $"systolic blood pressure: {sys} diastolic blood pressure: {dia} gender: {gender} age: {age}" +
-                                    "&appid=W3583L-KYHWAY3A3Q&output=JSON&format=image,plaintext&podtimeout=10";
+            var url = "http://api.wolframalpha.com/v2/query?input=" +
+                $"Risk of Heart Attack LDL cholesterol: {ldl} HDL cholesterol: {hdl} " +
+                $"systolic blood pressure: {sys} diastolic blood pressure: {dia} gender: {gender} age: {age}" +
+                $"&appid={appId}&output=JSON&format=image,plaintext&podtimeout=10";
 
             var resultData = await client.GetStringAsync(url);
             return resultData;
